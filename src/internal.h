@@ -9,7 +9,13 @@
 #import <QuartzCore/CAMetalLayer.h>
 #endif
 
+#ifdef __cplusplus
+extern "C" {
+#endif
 void lwmglSetErrorInternal(const char *message);
+#ifdef __cplusplus
+}
+#endif
 
 #ifdef __OBJC__
 typedef struct LWMGLContextState {
