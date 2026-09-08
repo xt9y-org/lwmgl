@@ -36,6 +36,9 @@ int lwmglSurfaceAttach(void *nativeWindow);
 void lwmglSurfaceDetach(void);
 int lwmglSurfaceAcquireDrawable(void);
 void lwmglSurfaceUpdateDrawableSize(void);
+int lwmglSurfaceResizeInternal(uint32_t pixelWidth, uint32_t pixelHeight);
+uint32_t lwmglSurfaceDrawableWidthInternal(void);
+uint32_t lwmglSurfaceDrawableHeightInternal(void);
 
 LWMGLBuffer lwmglBufferCreateInternal(const LWMGLBufferDesc *desc, const void *initialData);
 void lwmglBufferDestroyInternal(LWMGLBuffer buffer);
@@ -79,6 +82,10 @@ int lwmglCommandCommitInternal(LWMGLCommand command);
 int lwmglCommandWaitInternal(LWMGLCommand command);
 void lwmglCommandDestroyInternal(LWMGLCommand command);
 int lwmglCommandWaitIdleInternal(void);
+int lwmglCommandBeginRenderToDrawableInternal(LWMGLCommand command, LWMGLClearColor clearColor, int clear);
+int lwmglCommandSetRenderPipelineInternal(LWMGLCommand command, LWMGLRenderPipeline pipeline);
+int lwmglCommandDrawInternal(LWMGLCommand command, uint32_t vertexStart, uint32_t vertexCount);
+int lwmglCommandPresentInternal(LWMGLCommand command);
 id<MTLCommandBuffer> lwmglNativeCommandBufferInternal(LWMGLCommand command);
 id<MTLComputeCommandEncoder> lwmglNativeComputeEncoderInternal(LWMGLCommand command);
 #endif
