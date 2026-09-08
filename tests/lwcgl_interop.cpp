@@ -31,7 +31,7 @@ int main()
             glfw_error ? glfw_error : ""
         );
         if (
-            glfw_code == GLFW_PLATFORM_ERROR &&
+            glfw_code == GLFW_FORMAT_UNAVAILABLE &&
             glfw_error &&
             std::strstr(glfw_error, "NSGL: Failed to find a suitable pixel format") != nullptr)
         {
