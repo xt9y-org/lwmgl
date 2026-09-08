@@ -3,6 +3,9 @@
 #include <lwcgl/context.h>
 #include <lwmgl/lwmgl.h>
 
+#define GLFW_INCLUDE_NONE
+#include <GLFW/glfw3.h>
+
 #include <stdio.h>
 
 int main(void)
@@ -13,7 +16,19 @@ int main(void)
     lwcglSetContextVersion(4, 3);
     lwcglSetContextProfile(LWCGL_CONTEXT_COMPATIBILITY_PROFILE);
     if (Display.create() != 0) {
-        fprintf(stderr, "lwcgl: %s\n", lwcglGetLastError());
+        const char *glfw_error = NULL;
+        const int glfw_code = glfwGetError(&glfw_error);
+        fprintf(
+            stderr,
+            "lwcgl: %s; requested=%d.%d profile=%d; glfw=%d%s%s\n",
+            lwcglGetLastError(),
+            lwcglRequestedContextMajorVersion(),
+            lwcglRequestedContextMinorVersion(),
+            lwcglRequestedContextProfile(),
+            glfw_code,
+            glfw_error ? ": " : "",
+            glfw_error ? glfw_error : ""
+        );
         return 2;
     }
 
