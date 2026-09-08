@@ -3,6 +3,7 @@
 
 #include <lwmgl/context.h>
 #include <lwmgl/buffer.h>
+#include <lwmgl/texture.h>
 
 #ifdef __cplusplus
 extern "C" {
@@ -19,6 +20,14 @@ typedef struct LWMGLMetalAPI {
     void *(*bufferContents)(LWMGLBuffer buffer);
     size_t (*bufferSize)(LWMGLBuffer buffer);
     int (*uploadBuffer)(LWMGLBuffer buffer, size_t offset, const void *data, size_t size);
+
+    LWMGLTexture (*createTexture)(const LWMGLTextureDesc *desc);
+    void (*destroyTexture)(LWMGLTexture texture);
+    int (*uploadTexture2D)(LWMGLTexture texture, const void *data, size_t bytesPerRow);
+    uint32_t (*textureWidth)(LWMGLTexture texture);
+    uint32_t (*textureHeight)(LWMGLTexture texture);
+    LWMGLSampler (*createSampler)(const LWMGLSamplerDesc *desc);
+    void (*destroySampler)(LWMGLSampler sampler);
 
     size_t structSize;
     uint32_t abiVersion;
