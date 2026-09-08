@@ -5,15 +5,30 @@ on:
     branches: [main]
   pull_request:
 
+env:
+  LWCGL_SRC: ${{ runner.temp }}/lwcgl
+  LWCGL_PREFIX: ${{ runner.temp }}/lwcgl-prefix
+
 jobs:
   macos:
     runs-on: macos-15
     steps:
       - uses: actions/checkout@v4
       - name: Dependencies
-        run: brew install pkg-config glfw
+        run: |
+          brew install pkg-config glfw
+          git clone --depth 1 --branch v2.9.3 https://github.com/xt9y/lwcgl.git "$LWCGL_SRC"
+          make -C "$LWCGL_SRC" clean all
+          make -C "$LWCGL_SRC" install PREFIX="$LWCGL_PREFIX"
       - name: Check
         run: make clean && make check
+      - name: lwcgl interop
+        run: |
+          export PKG_CONFIG_PATH="$LWCGL_PREFIX/lib/pkgconfig"
+          cc -Iinclude $(pkg-config --cflags lwcgl-2.9.3) tests/lwcgl_interop.c build/liblwmgl-1.0.0.a $(pkg-config --libs --static lwcgl-2.9.3) -framework Metal -framework QuartzCore -framework AppKit -framework Foundation -o build/tests/lwcgl-interop-c
+          c++ -Iinclude $(pkg-config --cflags lwcgl-2.9.3) tests/lwcgl_interop.cpp build/liblwmgl-1.0.0.a $(pkg-config --libs --static lwcgl-2.9.3) -framework Metal -framework QuartzCore -framework AppKit -framework Foundation -o build/tests/lwcgl-interop-cpp
+          build/tests/lwcgl-interop-c
+          build/tests/lwcgl-interop-cpp
       - name: Sanitize
         run: make sanitize
       - name: Package
