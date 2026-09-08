@@ -4,6 +4,7 @@
 #include <lwmgl/context.h>
 #include <lwmgl/buffer.h>
 #include <lwmgl/texture.h>
+#include <lwmgl/shader.h>
 
 #ifdef __cplusplus
 extern "C" {
@@ -28,6 +29,16 @@ typedef struct LWMGLMetalAPI {
     uint32_t (*textureHeight)(LWMGLTexture texture);
     LWMGLSampler (*createSampler)(const LWMGLSamplerDesc *desc);
     void (*destroySampler)(LWMGLSampler sampler);
+
+    LWMGLLibrary (*createLibraryFromSource)(const char *source, size_t length);
+    LWMGLLibrary (*createLibraryFromFile)(const char *path);
+    void (*destroyLibrary)(LWMGLLibrary library);
+    LWMGLFunction (*createFunction)(LWMGLLibrary library, const char *name);
+    void (*destroyFunction)(LWMGLFunction function);
+    LWMGLComputePipeline (*createComputePipeline)(LWMGLFunction function);
+    void (*destroyComputePipeline)(LWMGLComputePipeline pipeline);
+    LWMGLRenderPipeline (*createRenderPipeline)(LWMGLFunction vertex, LWMGLFunction fragment, LWMGLPixelFormat colorFormat);
+    void (*destroyRenderPipeline)(LWMGLRenderPipeline pipeline);
 
     size_t structSize;
     uint32_t abiVersion;
