@@ -7,6 +7,7 @@
 #include <GLFW/glfw3.h>
 
 #include <stdio.h>
+#include <string.h>
 
 int main(void)
 {
@@ -29,6 +30,13 @@ int main(void)
             glfw_error ? ": " : "",
             glfw_error ? glfw_error : ""
         );
+        if (
+            glfw_code == GLFW_PLATFORM_ERROR &&
+            glfw_error &&
+            strstr(glfw_error, "NSGL: Failed to find a suitable pixel format") != NULL)
+        {
+            return 77;
+        }
         return 2;
     }
 
