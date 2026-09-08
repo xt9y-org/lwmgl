@@ -109,6 +109,13 @@ const LWMGLMetalAPI Metal = {
     .bufferContents = lwmglBufferContentsInternal,
     .bufferSize = lwmglBufferSizeInternal,
     .uploadBuffer = lwmglBufferUploadInternal,
+    .createTexture = lwmglTextureCreateInternal,
+    .destroyTexture = lwmglTextureDestroyInternal,
+    .uploadTexture2D = lwmglTextureUpload2DInternal,
+    .textureWidth = lwmglTextureWidthInternal,
+    .textureHeight = lwmglTextureHeightInternal,
+    .createSampler = lwmglSamplerCreateInternal,
+    .destroySampler = lwmglSamplerDestroyInternal,
     .structSize = sizeof(LWMGLMetalAPI),
     .abiVersion = LWMGL_ABI_VERSION
 };
