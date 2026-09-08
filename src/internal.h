@@ -28,6 +28,7 @@ typedef struct LWMGLContextState {
     __strong CALayer *previousLayer;
     BOOL previousWantsLayer;
     __strong id<CAMetalDrawable> drawable;
+    int autoDrawableSize;
     int created;
 } LWMGLContextState;
 
