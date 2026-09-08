@@ -42,6 +42,14 @@ void lwmglBufferDestroyInternal(LWMGLBuffer buffer);
 void *lwmglBufferContentsInternal(LWMGLBuffer buffer);
 size_t lwmglBufferSizeInternal(LWMGLBuffer buffer);
 int lwmglBufferUploadInternal(LWMGLBuffer buffer, size_t offset, const void *data, size_t size);
+
+LWMGLTexture lwmglTextureCreateInternal(const LWMGLTextureDesc *desc);
+void lwmglTextureDestroyInternal(LWMGLTexture texture);
+int lwmglTextureUpload2DInternal(LWMGLTexture texture, const void *data, size_t bytesPerRow);
+uint32_t lwmglTextureWidthInternal(LWMGLTexture texture);
+uint32_t lwmglTextureHeightInternal(LWMGLTexture texture);
+LWMGLSampler lwmglSamplerCreateInternal(const LWMGLSamplerDesc *desc);
+void lwmglSamplerDestroyInternal(LWMGLSampler sampler);
 #endif
 
 #endif
