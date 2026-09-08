@@ -138,6 +138,13 @@ const LWMGLMetalAPI Metal = {
     .wait = lwmglCommandWaitInternal,
     .destroyCommand = lwmglCommandDestroyInternal,
     .waitIdle = lwmglCommandWaitIdleInternal,
+    .resize = lwmglSurfaceResizeInternal,
+    .drawableWidth = lwmglSurfaceDrawableWidthInternal,
+    .drawableHeight = lwmglSurfaceDrawableHeightInternal,
+    .beginRenderToDrawable = lwmglCommandBeginRenderToDrawableInternal,
+    .setRenderPipeline = lwmglCommandSetRenderPipelineInternal,
+    .draw = lwmglCommandDrawInternal,
+    .present = lwmglCommandPresentInternal,
     .structSize = sizeof(LWMGLMetalAPI),
     .abiVersion = LWMGL_ABI_VERSION
 };
