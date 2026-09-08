@@ -89,8 +89,8 @@ $(TEST_DIR)/header-contract-cpp: tests/header_contract.cpp | $(TEST_DIR)
 stage-check: check-deps $(STATIC_LIB) $(SHARED_LIB) $(PKGCONFIG)
 	rm -rf $(BUILD)/stage-prefix
 	$(MAKE) install PREFIX=$(abspath $(BUILD)/stage-prefix)
-	PKG_CONFIG_PATH=$(abspath $(BUILD)/stage-prefix)/lib/pkgconfig $(CC) $(CFLAGS) tests/stage_consumer.c $$(PKG_CONFIG_PATH=$(abspath $(BUILD)/stage-prefix)/lib/pkgconfig pkg-config --cflags --libs --static lwmgl-$(VERSION)) -o $(TEST_DIR)/stage-consumer-c
-	PKG_CONFIG_PATH=$(abspath $(BUILD)/stage-prefix)/lib/pkgconfig $(CXX) $(CXXFLAGS) tests/stage_consumer.cpp $$(PKG_CONFIG_PATH=$(abspath $(BUILD)/stage-prefix)/lib/pkgconfig pkg-config --cflags --libs --static lwmgl-$(VERSION)) -o $(TEST_DIR)/stage-consumer-cpp
+	PKG_CONFIG_PATH=$(abspath $(BUILD)/stage-prefix)/lib/pkgconfig $(CC) $(CFLAGS) tests/stage_consumer.c $$(PKG_CONFIG_PATH=$(abspath $(BUILD)/stage-prefix)/lib/pkgconfig pkg-config --cflags --libs lwmgl-$(VERSION)) -Wl,-rpath,$(abspath $(BUILD)/stage-prefix)/lib -o $(TEST_DIR)/stage-consumer-c
+	PKG_CONFIG_PATH=$(abspath $(BUILD)/stage-prefix)/lib/pkgconfig $(CXX) $(CXXFLAGS) tests/stage_consumer.cpp $$(PKG_CONFIG_PATH=$(abspath $(BUILD)/stage-prefix)/lib/pkgconfig pkg-config --cflags --libs lwmgl-$(VERSION)) -Wl,-rpath,$(abspath $(BUILD)/stage-prefix)/lib -o $(TEST_DIR)/stage-consumer-cpp
 	$(TEST_DIR)/stage-consumer-c
 	$(TEST_DIR)/stage-consumer-cpp
 
