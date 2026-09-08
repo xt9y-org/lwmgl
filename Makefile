@@ -27,6 +27,8 @@ MM_OBJ := $(patsubst src/%.mm,$(BUILD)/%.o,$(MM_SRC))
 OBJ := $(C_OBJ) $(MM_OBJ)
 PKGCONFIG := $(BUILD)/lwmgl-$(VERSION).pc
 TEST_DIR := $(BUILD)/tests
+CONTRACT_C_SRC := $(filter-out tests/api_contract.c tests/header_contract.c,$(wildcard tests/*_contract.c))
+CONTRACT_C_BINS := $(patsubst tests/%_contract.c,$(TEST_DIR)/%-contract,$(CONTRACT_C_SRC))
 
 CPPFLAGS += -Iinclude
 CFLAGS ?= -O2
@@ -44,7 +46,7 @@ PLATFORM_LIBS := -framework Metal -framework QuartzCore -framework AppKit -frame
 PRIVATE_LIBS_PC := -framework Metal -framework QuartzCore -framework AppKit -framework Foundation $(GLFW_LIBS)
 LIBS := $(GLFW_LIBS) $(PLATFORM_LIBS)
 
-TEST_BINS := $(TEST_DIR)/api-contract-c $(TEST_DIR)/api-contract-cpp $(TEST_DIR)/header-contract-c $(TEST_DIR)/header-contract-cpp
+TEST_BINS := $(TEST_DIR)/api-contract-c $(TEST_DIR)/api-contract-cpp $(TEST_DIR)/header-contract-c $(TEST_DIR)/header-contract-cpp $(CONTRACT_C_BINS)
 
 .PHONY: all clean check test install uninstall stage-check check-deps
 all: check-deps $(STATIC_LIB) $(SHARED_LIB)
@@ -86,6 +88,9 @@ $(TEST_DIR)/header-contract-c: tests/header_contract.c | $(TEST_DIR)
 $(TEST_DIR)/header-contract-cpp: tests/header_contract.cpp | $(TEST_DIR)
 	$(CXX) $(CPPFLAGS) $(CXXFLAGS) -Werror $< -o $@
 
+$(TEST_DIR)/%-contract: tests/%_contract.c $(STATIC_LIB) | $(TEST_DIR)
+	$(CC) $(CPPFLAGS) $(CFLAGS) -Werror $< $(STATIC_LIB) $(LDFLAGS) $(LIBS) -o $@
+
 stage-check: check-deps $(STATIC_LIB) $(SHARED_LIB) $(PKGCONFIG)
 	rm -rf $(BUILD)/stage-prefix
 	$(MAKE) install PREFIX=$(abspath $(BUILD)/stage-prefix)
@@ -99,6 +104,7 @@ check: check-deps $(TEST_BINS) stage-check
 	$(TEST_DIR)/api-contract-cpp
 	$(TEST_DIR)/header-contract-c
 	$(TEST_DIR)/header-contract-cpp
+	@set -e; for t in $(CONTRACT_C_BINS); do $$t; done
 
 install: check-deps $(STATIC_LIB) $(SHARED_LIB)
 	install -d $(DESTDIR)$(PREFIX)/include/lwmgl-$(VERSION)/lwmgl
