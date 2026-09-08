@@ -36,6 +36,12 @@ int lwmglSurfaceAttach(void *nativeWindow);
 void lwmglSurfaceDetach(void);
 int lwmglSurfaceAcquireDrawable(void);
 void lwmglSurfaceUpdateDrawableSize(void);
+
+LWMGLBuffer lwmglBufferCreateInternal(const LWMGLBufferDesc *desc, const void *initialData);
+void lwmglBufferDestroyInternal(LWMGLBuffer buffer);
+void *lwmglBufferContentsInternal(LWMGLBuffer buffer);
+size_t lwmglBufferSizeInternal(LWMGLBuffer buffer);
+int lwmglBufferUploadInternal(LWMGLBuffer buffer, size_t offset, const void *data, size_t size);
 #endif
 
 #endif
