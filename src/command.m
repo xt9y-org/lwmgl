@@ -7,9 +7,11 @@ struct LWMGLCommandImpl {
     void *computeEncoder;
     void *renderEncoder;
     void *blitEncoder;
+    void *drawable;
     NSUInteger computeExecutionWidth;
     NSUInteger computeMaxThreads;
     int computePipelineSet;
+    int presented;
     int committed;
 };
 
@@ -27,10 +29,24 @@ static id<MTLComputeCommandEncoder> nativeComputeEncoder(LWMGLCommand command)
         : nil;
 }
 
+static id<MTLRenderCommandEncoder> nativeRenderEncoder(LWMGLCommand command)
+{
+    return command && command->renderEncoder
+        ? (__bridge id<MTLRenderCommandEncoder>)command->renderEncoder
+        : nil;
+}
+
 static id<MTLBlitCommandEncoder> nativeBlitEncoder(LWMGLCommand command)
 {
     return command && command->blitEncoder
         ? (__bridge id<MTLBlitCommandEncoder>)command->blitEncoder
+        : nil;
+}
+
+static id<CAMetalDrawable> nativeDrawable(LWMGLCommand command)
+{
+    return command && command->drawable
+        ? (__bridge id<CAMetalDrawable>)command->drawable
         : nil;
 }
 
@@ -281,6 +297,100 @@ int lwmglCommandCopyBufferInternal(
     return 0;
 }
 
+int lwmglCommandBeginRenderToDrawableInternal(LWMGLCommand command, LWMGLClearColor clearColor, int clear)
+{
+    @autoreleasepool {
+        if (validateMutableCommand(command) != 0) return -1;
+        if (command->drawable) {
+            lwmglSetErrorInternal("command already owns a drawable");
+            return -1;
+        }
+        endActiveEncoder(command);
+        if (lwmglSurfaceAcquireDrawable() != 0) return -1;
+
+        LWMGLContextState *state = lwmglContextState();
+        id<CAMetalDrawable> drawable = state->drawable;
+        if (!drawable) {
+            lwmglSetErrorInternal("Metal drawable is unavailable");
+            return -1;
+        }
+        command->drawable = (__bridge_retained void *)drawable;
+        state->drawable = nil;
+
+        MTLRenderPassDescriptor *pass = [MTLRenderPassDescriptor renderPassDescriptor];
+        if (!pass) {
+            releaseRetained(&command->drawable);
+            lwmglSetErrorInternal("failed to create Metal render pass descriptor");
+            return -1;
+        }
+        pass.colorAttachments[0].texture = drawable.texture;
+        pass.colorAttachments[0].loadAction = clear ? MTLLoadActionClear : MTLLoadActionLoad;
+        pass.colorAttachments[0].storeAction = MTLStoreActionStore;
+        pass.colorAttachments[0].clearColor = MTLClearColorMake(
+            clearColor.r, clearColor.g, clearColor.b, clearColor.a);
+
+        id<MTLRenderCommandEncoder> encoder = [nativeCommandBuffer(command) renderCommandEncoderWithDescriptor:pass];
+        if (!encoder) {
+            releaseRetained(&command->drawable);
+            lwmglSetErrorInternal("failed to create Metal render encoder");
+            return -1;
+        }
+        command->renderEncoder = (__bridge_retained void *)encoder;
+        return 0;
+    }
+}
+
+int lwmglCommandSetRenderPipelineInternal(LWMGLCommand command, LWMGLRenderPipeline pipeline)
+{
+    if (validateMutableCommand(command) != 0) return -1;
+    id<MTLRenderCommandEncoder> encoder = nativeRenderEncoder(command);
+    if (!encoder) {
+        lwmglSetErrorInternal("render encoding is not active");
+        return -1;
+    }
+    id<MTLRenderPipelineState> native = lwmglNativeRenderPipelineInternal(pipeline);
+    if (!native) {
+        lwmglSetErrorInternal("render pipeline is null");
+        return -1;
+    }
+    [encoder setRenderPipelineState:native];
+    return 0;
+}
+
+int lwmglCommandDrawInternal(LWMGLCommand command, uint32_t vertexStart, uint32_t vertexCount)
+{
+    if (validateMutableCommand(command) != 0) return -1;
+    id<MTLRenderCommandEncoder> encoder = nativeRenderEncoder(command);
+    if (!encoder) {
+        lwmglSetErrorInternal("render encoding is not active");
+        return -1;
+    }
+    if (vertexCount == 0u) {
+        lwmglSetErrorInternal("draw vertex count must be non-zero");
+        return -1;
+    }
+    [encoder drawPrimitives:MTLPrimitiveTypeTriangle vertexStart:vertexStart vertexCount:vertexCount];
+    return 0;
+}
+
+int lwmglCommandPresentInternal(LWMGLCommand command)
+{
+    if (validateMutableCommand(command) != 0) return -1;
+    id<CAMetalDrawable> drawable = nativeDrawable(command);
+    if (!drawable) {
+        lwmglSetErrorInternal("command has no drawable to present");
+        return -1;
+    }
+    if (command->presented) {
+        lwmglSetErrorInternal("drawable has already been scheduled for presentation");
+        return -1;
+    }
+    endActiveEncoder(command);
+    [nativeCommandBuffer(command) presentDrawable:drawable];
+    command->presented = 1;
+    return 0;
+}
+
 int lwmglCommandEndEncodingInternal(LWMGLCommand command)
 {
     if (validateMutableCommand(command) != 0) return -1;
@@ -294,6 +404,7 @@ int lwmglCommandCommitInternal(LWMGLCommand command)
     endActiveEncoder(command);
     [nativeCommandBuffer(command) commit];
     command->committed = 1;
+    releaseRetained(&command->drawable);
     return 0;
 }
 
@@ -326,6 +437,7 @@ void lwmglCommandDestroyInternal(LWMGLCommand command)
         releaseRetained(&command->computeEncoder);
         releaseRetained(&command->renderEncoder);
         releaseRetained(&command->blitEncoder);
+        releaseRetained(&command->drawable);
         releaseRetained(&command->commandBuffer);
         free(command);
     }
