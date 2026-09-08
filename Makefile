@@ -28,8 +28,10 @@ OBJ := $(C_OBJ) $(M_OBJ)
 PKGCONFIG := $(BUILD)/lwmgl-$(VERSION).pc
 TEST_DIR := $(BUILD)/tests
 EXAMPLE_DIR := $(BUILD)/examples
+STAGE_PREFIX := $(abspath $(BUILD)/stage-prefix)
 CONTRACT_C_SRC := $(filter-out tests/api_contract.c tests/header_contract.c,$(wildcard tests/*_contract.c))
 CONTRACT_C_BINS := $(patsubst tests/%_contract.c,$(TEST_DIR)/%-contract,$(CONTRACT_C_SRC))
+RUNTIME_BINS := $(TEST_DIR)/runtime-smoke-c $(TEST_DIR)/runtime-smoke-cpp
 EXAMPLE_BINS := $(EXAMPLE_DIR)/clear-c $(EXAMPLE_DIR)/clear-cpp
 
 CPPFLAGS += -Iinclude
@@ -48,7 +50,7 @@ PLATFORM_LIBS := -framework Metal -framework QuartzCore -framework AppKit -frame
 PRIVATE_LIBS_PC := -framework Metal -framework QuartzCore -framework AppKit -framework Foundation $(GLFW_LIBS)
 LIBS := $(GLFW_LIBS) $(PLATFORM_LIBS)
 
-TEST_BINS := $(TEST_DIR)/api-contract-c $(TEST_DIR)/api-contract-cpp $(TEST_DIR)/header-contract-c $(TEST_DIR)/header-contract-cpp $(CONTRACT_C_BINS)
+TEST_BINS := $(TEST_DIR)/api-contract-c $(TEST_DIR)/api-contract-cpp $(TEST_DIR)/header-contract-c $(TEST_DIR)/header-contract-cpp $(CONTRACT_C_BINS) $(RUNTIME_BINS)
 
 .PHONY: all clean check test install uninstall stage-check check-deps example
 all: check-deps $(STATIC_LIB) $(SHARED_LIB)
@@ -94,6 +96,12 @@ $(TEST_DIR)/header-contract-cpp: tests/header_contract.cpp | $(TEST_DIR)
 $(TEST_DIR)/%-contract: tests/%_contract.c $(STATIC_LIB) | $(TEST_DIR)
 	$(CC) $(CPPFLAGS) $(CFLAGS) -Werror $< $(STATIC_LIB) $(LDFLAGS) $(LIBS) -o $@
 
+$(TEST_DIR)/runtime-smoke-c: tests/runtime_smoke.c $(STATIC_LIB) | $(TEST_DIR)
+	$(CC) $(CPPFLAGS) $(CFLAGS) -Werror $< $(STATIC_LIB) $(LDFLAGS) $(LIBS) -o $@
+
+$(TEST_DIR)/runtime-smoke-cpp: tests/runtime_smoke.cpp $(STATIC_LIB) | $(TEST_DIR)
+	$(CXX) $(CPPFLAGS) $(CXXFLAGS) -Werror $< $(STATIC_LIB) $(LDFLAGS) $(LIBS) -o $@
+
 $(EXAMPLE_DIR)/clear-c: examples/clear.c $(STATIC_LIB) | $(EXAMPLE_DIR)
 	$(CC) $(CPPFLAGS) $(CFLAGS) -Werror $< $(STATIC_LIB) $(LDFLAGS) $(LIBS) -o $@
 
@@ -101,12 +109,16 @@ $(EXAMPLE_DIR)/clear-cpp: examples/clear.cpp $(STATIC_LIB) | $(EXAMPLE_DIR)
 	$(CXX) $(CPPFLAGS) $(CXXFLAGS) -Werror $< $(STATIC_LIB) $(LDFLAGS) $(LIBS) -o $@
 
 stage-check: check-deps $(STATIC_LIB) $(SHARED_LIB) $(PKGCONFIG)
-	rm -rf $(BUILD)/stage-prefix
-	$(MAKE) install PREFIX=$(abspath $(BUILD)/stage-prefix)
-	PKG_CONFIG_PATH=$(abspath $(BUILD)/stage-prefix)/lib/pkgconfig $(CC) $(CFLAGS) tests/stage_consumer.c $$(PKG_CONFIG_PATH=$(abspath $(BUILD)/stage-prefix)/lib/pkgconfig pkg-config --cflags --libs lwmgl-$(VERSION)) -Wl,-rpath,$(abspath $(BUILD)/stage-prefix)/lib -o $(TEST_DIR)/stage-consumer-c
-	PKG_CONFIG_PATH=$(abspath $(BUILD)/stage-prefix)/lib/pkgconfig $(CXX) $(CXXFLAGS) tests/stage_consumer.cpp $$(PKG_CONFIG_PATH=$(abspath $(BUILD)/stage-prefix)/lib/pkgconfig pkg-config --cflags --libs lwmgl-$(VERSION)) -Wl,-rpath,$(abspath $(BUILD)/stage-prefix)/lib -o $(TEST_DIR)/stage-consumer-cpp
+	rm -rf $(STAGE_PREFIX)
+	$(MAKE) install PREFIX=$(STAGE_PREFIX)
+	PKG_CONFIG_PATH=$(STAGE_PREFIX)/lib/pkgconfig $(CC) $(CFLAGS) tests/stage_consumer.c $$(PKG_CONFIG_PATH=$(STAGE_PREFIX)/lib/pkgconfig pkg-config --cflags --libs lwmgl-$(VERSION)) -Wl,-rpath,$(STAGE_PREFIX)/lib -o $(TEST_DIR)/stage-consumer-c
+	PKG_CONFIG_PATH=$(STAGE_PREFIX)/lib/pkgconfig $(CXX) $(CXXFLAGS) tests/stage_consumer.cpp $$(PKG_CONFIG_PATH=$(STAGE_PREFIX)/lib/pkgconfig pkg-config --cflags --libs lwmgl-$(VERSION)) -Wl,-rpath,$(STAGE_PREFIX)/lib -o $(TEST_DIR)/stage-consumer-cpp
+	PKG_CONFIG_PATH=$(STAGE_PREFIX)/lib/pkgconfig $(CC) $(CFLAGS) tests/stage_consumer.c $$(PKG_CONFIG_PATH=$(STAGE_PREFIX)/lib/pkgconfig pkg-config --cflags lwmgl-$(VERSION)) $(STAGE_PREFIX)/lib/$(STATIC_LIBNAME) $$(PKG_CONFIG_PATH=$(STAGE_PREFIX)/lib/pkgconfig pkg-config --libs --static lwmgl-$(VERSION) | sed -e 's|-L$(STAGE_PREFIX)/lib ||g' -e 's|-llwmgl ||g') -o $(TEST_DIR)/stage-consumer-c-static
+	PKG_CONFIG_PATH=$(STAGE_PREFIX)/lib/pkgconfig $(CXX) $(CXXFLAGS) tests/stage_consumer.cpp $$(PKG_CONFIG_PATH=$(STAGE_PREFIX)/lib/pkgconfig pkg-config --cflags lwmgl-$(VERSION)) $(STAGE_PREFIX)/lib/$(STATIC_LIBNAME) $$(PKG_CONFIG_PATH=$(STAGE_PREFIX)/lib/pkgconfig pkg-config --libs --static lwmgl-$(VERSION) | sed -e 's|-L$(STAGE_PREFIX)/lib ||g' -e 's|-llwmgl ||g') -o $(TEST_DIR)/stage-consumer-cpp-static
 	$(TEST_DIR)/stage-consumer-c
 	$(TEST_DIR)/stage-consumer-cpp
+	$(TEST_DIR)/stage-consumer-c-static
+	$(TEST_DIR)/stage-consumer-cpp-static
 
 check: check-deps $(TEST_BINS) stage-check example
 	$(TEST_DIR)/api-contract-c
@@ -114,6 +126,8 @@ check: check-deps $(TEST_BINS) stage-check example
 	$(TEST_DIR)/header-contract-c
 	$(TEST_DIR)/header-contract-cpp
 	@set -e; for t in $(CONTRACT_C_BINS); do $$t; done
+	$(TEST_DIR)/runtime-smoke-c
+	$(TEST_DIR)/runtime-smoke-cpp
 
 install: check-deps $(STATIC_LIB) $(SHARED_LIB)
 	install -d $(DESTDIR)$(PREFIX)/include/lwmgl-$(VERSION)/lwmgl
