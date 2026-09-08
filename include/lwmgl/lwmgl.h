@@ -73,6 +73,11 @@ typedef struct LWMGLMetalAPI {
 
     size_t structSize;
     uint32_t abiVersion;
+
+    /* Append-only v1 extension: render-stage fragment resources. */
+    int (*setFragmentBuffer)(LWMGLCommand command, LWMGLBuffer buffer, size_t offset, uint32_t index);
+    int (*setFragmentTexture)(LWMGLCommand command, LWMGLTexture texture, uint32_t index);
+    int (*setFragmentSampler)(LWMGLCommand command, LWMGLSampler sampler, uint32_t index);
 } LWMGLMetalAPI;
 
 extern const LWMGLMetalAPI Metal;
