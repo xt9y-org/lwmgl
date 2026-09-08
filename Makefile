@@ -1,6 +1,6 @@
 CC ?= cc
 CXX ?= c++
-OBJCXX ?= c++
+OBJC ?= cc
 AR ?= ar
 PREFIX ?= /usr/local
 VERSION := 1.0.0
@@ -21,10 +21,10 @@ SHARED_LIB := $(BUILD)/$(SHARED_LIBNAME)
 SHARED_LDFLAGS := -dynamiclib -Wl,-install_name,@rpath/$(SHARED_LIBNAME)
 PUBLIC_HEADERS := $(wildcard include/lwmgl/*.h)
 C_SRC := $(wildcard src/*.c)
-MM_SRC := $(wildcard src/*.mm)
+M_SRC := $(wildcard src/*.m)
 C_OBJ := $(patsubst src/%.c,$(BUILD)/%.o,$(C_SRC))
-MM_OBJ := $(patsubst src/%.mm,$(BUILD)/%.o,$(MM_SRC))
-OBJ := $(C_OBJ) $(MM_OBJ)
+M_OBJ := $(patsubst src/%.m,$(BUILD)/%.o,$(M_SRC))
+OBJ := $(C_OBJ) $(M_OBJ)
 PKGCONFIG := $(BUILD)/lwmgl-$(VERSION).pc
 TEST_DIR := $(BUILD)/tests
 CONTRACT_C_SRC := $(filter-out tests/api_contract.c tests/header_contract.c,$(wildcard tests/*_contract.c))
@@ -35,8 +35,8 @@ CFLAGS ?= -O2
 CFLAGS += -std=c11 -Wall -Wextra -Wpedantic -fPIC
 CXXFLAGS ?= -O2
 CXXFLAGS += -std=c++17 -Wall -Wextra -Wpedantic
-OBJCXXFLAGS ?= -O2
-OBJCXXFLAGS += -std=c++17 -Wall -Wextra -Wpedantic -fPIC -fobjc-arc -fno-exceptions -fno-rtti
+OBJCFLAGS ?= -O2
+OBJCFLAGS += -std=c11 -Wall -Wextra -Wpedantic -fPIC -fobjc-arc
 LDFLAGS ?=
 
 GLFW_CFLAGS := $(shell pkg-config --cflags glfw3 2>/dev/null)
@@ -62,8 +62,8 @@ $(BUILD) $(TEST_DIR):
 $(BUILD)/%.o: src/%.c $(PUBLIC_HEADERS) | $(BUILD)
 	$(CC) $(CPPFLAGS) $(CFLAGS) -Werror -c $< -o $@
 
-$(BUILD)/%.o: src/%.mm $(PUBLIC_HEADERS) | $(BUILD)
-	$(OBJCXX) $(CPPFLAGS) $(OBJCXXFLAGS) -Werror -c $< -o $@
+$(BUILD)/%.o: src/%.m $(PUBLIC_HEADERS) | $(BUILD)
+	$(OBJC) $(CPPFLAGS) $(OBJCFLAGS) -Werror -c $< -o $@
 
 $(STATIC_LIB): $(OBJ)
 	rm -f $@
@@ -71,7 +71,7 @@ $(STATIC_LIB): $(OBJ)
 
 $(SHARED_LIB): $(OBJ)
 	rm -f $@
-	$(OBJCXX) $(SHARED_LDFLAGS) -o $@ $^ $(LDFLAGS) $(LIBS)
+	$(CC) $(SHARED_LDFLAGS) -o $@ $^ $(LDFLAGS) $(LIBS)
 
 $(PKGCONFIG): lwmgl-1.0.0.pc.in | $(BUILD)
 	sed -e 's|@PREFIX@|$(PREFIX)|g' -e 's|@PRIVATE_LIBS@|$(PRIVATE_LIBS_PC)|g' $< > $@
