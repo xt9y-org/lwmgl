@@ -145,6 +145,12 @@ const LWMGLMetalAPI Metal = {
     .setRenderPipeline = lwmglCommandSetRenderPipelineInternal,
     .draw = lwmglCommandDrawInternal,
     .present = lwmglCommandPresentInternal,
+    .supportsRayTracing = lwmglRayTracingSupportedInternal,
+    .createTriangleAccelerationStructure = lwmglTriangleAccelerationStructureCreateInternal,
+    .createInstanceAccelerationStructure = lwmglInstanceAccelerationStructureCreateInternal,
+    .rebuildAccelerationStructure = lwmglAccelerationStructureRebuildInternal,
+    .destroyAccelerationStructure = lwmglAccelerationStructureDestroyInternal,
+    .setAccelerationStructure = lwmglCommandSetAccelerationStructureInternal,
     .structSize = sizeof(LWMGLMetalAPI),
     .abiVersion = LWMGL_ABI_VERSION
 };
