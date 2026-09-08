@@ -1,0 +1,16 @@
+name: CI
+
+on:
+  push:
+    branches: [main, lwmgl-v1]
+  pull_request:
+
+jobs:
+  macos:
+    runs-on: macos-15
+    steps:
+      - uses: actions/checkout@v4
+      - name: Dependencies
+        run: brew install pkg-config glfw
+      - name: Check
+        run: make clean && make check
