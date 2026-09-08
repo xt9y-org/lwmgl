@@ -65,6 +65,22 @@ LWMGLRenderPipeline lwmglRenderPipelineCreateInternal(LWMGLFunction vertex, LWMG
 void lwmglRenderPipelineDestroyInternal(LWMGLRenderPipeline pipeline);
 id<MTLComputePipelineState> lwmglNativeComputePipelineInternal(LWMGLComputePipeline pipeline);
 id<MTLRenderPipelineState> lwmglNativeRenderPipelineInternal(LWMGLRenderPipeline pipeline);
+
+LWMGLCommand lwmglCommandBeginInternal(void);
+int lwmglCommandBeginComputeInternal(LWMGLCommand command);
+int lwmglCommandSetComputePipelineInternal(LWMGLCommand command, LWMGLComputePipeline pipeline);
+int lwmglCommandSetBufferInternal(LWMGLCommand command, LWMGLBuffer buffer, size_t offset, uint32_t index);
+int lwmglCommandSetTextureInternal(LWMGLCommand command, LWMGLTexture texture, uint32_t index);
+int lwmglCommandSetSamplerInternal(LWMGLCommand command, LWMGLSampler sampler, uint32_t index);
+int lwmglCommandDispatchInternal(LWMGLCommand command, uint32_t x, uint32_t y, uint32_t z);
+int lwmglCommandCopyBufferInternal(LWMGLCommand command, LWMGLBuffer src, size_t srcOffset, LWMGLBuffer dst, size_t dstOffset, size_t size);
+int lwmglCommandEndEncodingInternal(LWMGLCommand command);
+int lwmglCommandCommitInternal(LWMGLCommand command);
+int lwmglCommandWaitInternal(LWMGLCommand command);
+void lwmglCommandDestroyInternal(LWMGLCommand command);
+int lwmglCommandWaitIdleInternal(void);
+id<MTLCommandBuffer> lwmglNativeCommandBufferInternal(LWMGLCommand command);
+id<MTLComputeCommandEncoder> lwmglNativeComputeEncoderInternal(LWMGLCommand command);
 #endif
 
 #endif
