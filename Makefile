@@ -36,7 +36,7 @@ CFLAGS += -std=c11 -Wall -Wextra -Wpedantic -fPIC
 CXXFLAGS ?= -O2
 CXXFLAGS += -std=c++17 -Wall -Wextra -Wpedantic
 OBJCXXFLAGS ?= -O2
-OBJCXXFLAGS += -std=c++17 -Wall -Wextra -Wpedantic -fPIC -fobjc-arc
+OBJCXXFLAGS += -std=c++17 -Wall -Wextra -Wpedantic -fPIC -fobjc-arc -fno-exceptions -fno-rtti
 LDFLAGS ?=
 
 GLFW_CFLAGS := $(shell pkg-config --cflags glfw3 2>/dev/null)
