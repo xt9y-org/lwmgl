@@ -104,6 +104,11 @@ const LWMGLMetalAPI Metal = {
     .destroy = contextDestroy,
     .isCreated = contextIsCreated,
     .getDeviceInfo = contextGetDeviceInfo,
+    .createBuffer = lwmglBufferCreateInternal,
+    .destroyBuffer = lwmglBufferDestroyInternal,
+    .bufferContents = lwmglBufferContentsInternal,
+    .bufferSize = lwmglBufferSizeInternal,
+    .uploadBuffer = lwmglBufferUploadInternal,
     .structSize = sizeof(LWMGLMetalAPI),
     .abiVersion = LWMGL_ABI_VERSION
 };
