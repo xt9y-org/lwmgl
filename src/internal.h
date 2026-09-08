@@ -42,6 +42,7 @@ void lwmglBufferDestroyInternal(LWMGLBuffer buffer);
 void *lwmglBufferContentsInternal(LWMGLBuffer buffer);
 size_t lwmglBufferSizeInternal(LWMGLBuffer buffer);
 int lwmglBufferUploadInternal(LWMGLBuffer buffer, size_t offset, const void *data, size_t size);
+id<MTLBuffer> lwmglNativeBufferInternal(LWMGLBuffer buffer);
 
 LWMGLTexture lwmglTextureCreateInternal(const LWMGLTextureDesc *desc);
 void lwmglTextureDestroyInternal(LWMGLTexture texture);
@@ -50,6 +51,20 @@ uint32_t lwmglTextureWidthInternal(LWMGLTexture texture);
 uint32_t lwmglTextureHeightInternal(LWMGLTexture texture);
 LWMGLSampler lwmglSamplerCreateInternal(const LWMGLSamplerDesc *desc);
 void lwmglSamplerDestroyInternal(LWMGLSampler sampler);
+id<MTLTexture> lwmglNativeTextureInternal(LWMGLTexture texture);
+id<MTLSamplerState> lwmglNativeSamplerInternal(LWMGLSampler sampler);
+
+LWMGLLibrary lwmglLibraryCreateFromSourceInternal(const char *source, size_t length);
+LWMGLLibrary lwmglLibraryCreateFromFileInternal(const char *path);
+void lwmglLibraryDestroyInternal(LWMGLLibrary library);
+LWMGLFunction lwmglFunctionCreateInternal(LWMGLLibrary library, const char *name);
+void lwmglFunctionDestroyInternal(LWMGLFunction function);
+LWMGLComputePipeline lwmglComputePipelineCreateInternal(LWMGLFunction function);
+void lwmglComputePipelineDestroyInternal(LWMGLComputePipeline pipeline);
+LWMGLRenderPipeline lwmglRenderPipelineCreateInternal(LWMGLFunction vertex, LWMGLFunction fragment, LWMGLPixelFormat colorFormat);
+void lwmglRenderPipelineDestroyInternal(LWMGLRenderPipeline pipeline);
+id<MTLComputePipelineState> lwmglNativeComputePipelineInternal(LWMGLComputePipeline pipeline);
+id<MTLRenderPipelineState> lwmglNativeRenderPipelineInternal(LWMGLRenderPipeline pipeline);
 #endif
 
 #endif
