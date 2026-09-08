@@ -100,10 +100,10 @@ static int contextGetDeviceInfo(LWMGLDeviceInfo *outInfo)
 }
 
 const LWMGLMetalAPI Metal = {
-    contextCreate,
-    contextDestroy,
-    contextIsCreated,
-    contextGetDeviceInfo,
-    sizeof(LWMGLMetalAPI),
-    LWMGL_ABI_VERSION
+    .create = contextCreate,
+    .destroy = contextDestroy,
+    .isCreated = contextIsCreated,
+    .getDeviceInfo = contextGetDeviceInfo,
+    .structSize = sizeof(LWMGLMetalAPI),
+    .abiVersion = LWMGL_ABI_VERSION
 };
