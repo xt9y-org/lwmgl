@@ -25,10 +25,21 @@ jobs:
       - name: lwcgl interop
         run: |
           export PKG_CONFIG_PATH="$LWCGL_PREFIX/lib/pkgconfig"
-          cc -Iinclude $(pkg-config --cflags lwcgl-2.9.3) tests/lwcgl_interop.c build/liblwmgl-1.0.0.a $(pkg-config --libs --static lwcgl-2.9.3) -framework Metal -framework QuartzCore -framework AppKit -framework Foundation -o build/tests/lwcgl-interop-c
-          c++ -Iinclude $(pkg-config --cflags lwcgl-2.9.3) tests/lwcgl_interop.cpp build/liblwmgl-1.0.0.a $(pkg-config --libs --static lwcgl-2.9.3) -framework Metal -framework QuartzCore -framework AppKit -framework Foundation -o build/tests/lwcgl-interop-cpp
-          build/tests/lwcgl-interop-c
-          build/tests/lwcgl-interop-cpp
+          cc -DGL_SILENCE_DEPRECATION -Iinclude $(pkg-config --cflags lwcgl-2.9.3) tests/lwcgl_interop.c build/liblwmgl-1.0.0.a $(pkg-config --libs --static lwcgl-2.9.3) -framework Metal -framework QuartzCore -framework AppKit -framework Foundation -o build/tests/lwcgl-interop-c
+          c++ -DGL_SILENCE_DEPRECATION -Iinclude $(pkg-config --cflags lwcgl-2.9.3) tests/lwcgl_interop.cpp build/liblwmgl-1.0.0.a $(pkg-config --libs --static lwcgl-2.9.3) -framework Metal -framework QuartzCore -framework AppKit -framework Foundation -o build/tests/lwcgl-interop-cpp
+          run_interop() {
+            set +e
+            "$1"
+            status=$?
+            set -e
+            if [ "$status" -eq 77 ]; then
+              echo "SKIP: hosted runner has no usable NSGL pixel format"
+              return 0
+            fi
+            return "$status"
+          }
+          run_interop build/tests/lwcgl-interop-c
+          run_interop build/tests/lwcgl-interop-cpp
       - name: Sanitize
         run: make sanitize
       - name: Package
