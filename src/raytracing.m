@@ -287,13 +287,13 @@ LWMGLAccelerationStructure lwmglInstanceAccelerationStructureCreateInternal(
             }
             [nativeStructures addObject:accelerationStructure];
 
-            nativeInstances[i].transformationMatrix[0] = MTLPackedFloat3Make(
+            nativeInstances[i].transformationMatrix.columns[0] = MTLPackedFloat3Make(
                 instances[i].transform[0], instances[i].transform[4], instances[i].transform[8]);
-            nativeInstances[i].transformationMatrix[1] = MTLPackedFloat3Make(
+            nativeInstances[i].transformationMatrix.columns[1] = MTLPackedFloat3Make(
                 instances[i].transform[1], instances[i].transform[5], instances[i].transform[9]);
-            nativeInstances[i].transformationMatrix[2] = MTLPackedFloat3Make(
+            nativeInstances[i].transformationMatrix.columns[2] = MTLPackedFloat3Make(
                 instances[i].transform[2], instances[i].transform[6], instances[i].transform[10]);
-            nativeInstances[i].transformationMatrix[3] = MTLPackedFloat3Make(
+            nativeInstances[i].transformationMatrix.columns[3] = MTLPackedFloat3Make(
                 instances[i].transform[3], instances[i].transform[7], instances[i].transform[11]);
             nativeInstances[i].options = MTLAccelerationStructureInstanceOptionNone;
             nativeInstances[i].mask = instances[i].mask;
