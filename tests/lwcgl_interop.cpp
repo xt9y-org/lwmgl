@@ -3,7 +3,11 @@
 #include <lwcgl/context.h>
 #include <lwmgl/lwmgl.h>
 
+#define GLFW_INCLUDE_NONE
+#include <GLFW/glfw3.h>
+
 #include <cstdio>
+#include <cstring>
 
 int main()
 {
@@ -13,7 +17,26 @@ int main()
     lwcglSetContextVersion(4, 3);
     lwcglSetContextProfile(LWCGL_CONTEXT_COMPATIBILITY_PROFILE);
     if (Display.create() != 0) {
-        std::fprintf(stderr, "lwcgl: %s\n", lwcglGetLastError());
+        const char *glfw_error = nullptr;
+        const int glfw_code = glfwGetError(&glfw_error);
+        std::fprintf(
+            stderr,
+            "lwcgl: %s; requested=%d.%d profile=%d; glfw=%d%s%s\n",
+            lwcglGetLastError(),
+            lwcglRequestedContextMajorVersion(),
+            lwcglRequestedContextMinorVersion(),
+            lwcglRequestedContextProfile(),
+            glfw_code,
+            glfw_error ? ": " : "",
+            glfw_error ? glfw_error : ""
+        );
+        if (
+            glfw_code == GLFW_PLATFORM_ERROR &&
+            glfw_error &&
+            std::strstr(glfw_error, "NSGL: Failed to find a suitable pixel format") != nullptr)
+        {
+            return 77;
+        }
         return 2;
     }
 
