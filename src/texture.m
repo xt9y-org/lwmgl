@@ -317,3 +317,15 @@ void lwmglSamplerDestroyInternal(LWMGLSampler sampler)
         free(sampler);
     }
 }
+
+id<MTLTexture> lwmglNativeTextureInternal(LWMGLTexture texture)
+{
+    return nativeTexture(texture);
+}
+
+id<MTLSamplerState> lwmglNativeSamplerInternal(LWMGLSampler sampler)
+{
+    return sampler && sampler->metalSampler
+        ? (__bridge id<MTLSamplerState>)sampler->metalSampler
+        : nil;
+}
