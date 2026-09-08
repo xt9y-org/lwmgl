@@ -182,3 +182,8 @@ int lwmglBufferUploadInternal(LWMGLBuffer buffer, size_t offset, const void *dat
 
     return blitUpload(object, offset, data, size);
 }
+
+id<MTLBuffer> lwmglNativeBufferInternal(LWMGLBuffer buffer)
+{
+    return nativeBuffer(buffer);
+}
