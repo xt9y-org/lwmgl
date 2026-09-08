@@ -5,6 +5,7 @@
 #include <lwmgl/buffer.h>
 #include <lwmgl/texture.h>
 #include <lwmgl/shader.h>
+#include <lwmgl/command.h>
 
 #ifdef __cplusplus
 extern "C" {
@@ -39,6 +40,20 @@ typedef struct LWMGLMetalAPI {
     void (*destroyComputePipeline)(LWMGLComputePipeline pipeline);
     LWMGLRenderPipeline (*createRenderPipeline)(LWMGLFunction vertex, LWMGLFunction fragment, LWMGLPixelFormat colorFormat);
     void (*destroyRenderPipeline)(LWMGLRenderPipeline pipeline);
+
+    LWMGLCommand (*begin)(void);
+    int (*beginCompute)(LWMGLCommand command);
+    int (*setComputePipeline)(LWMGLCommand command, LWMGLComputePipeline pipeline);
+    int (*setBuffer)(LWMGLCommand command, LWMGLBuffer buffer, size_t offset, uint32_t index);
+    int (*setTexture)(LWMGLCommand command, LWMGLTexture texture, uint32_t index);
+    int (*setSampler)(LWMGLCommand command, LWMGLSampler sampler, uint32_t index);
+    int (*dispatch)(LWMGLCommand command, uint32_t x, uint32_t y, uint32_t z);
+    int (*copyBuffer)(LWMGLCommand command, LWMGLBuffer src, size_t srcOffset, LWMGLBuffer dst, size_t dstOffset, size_t size);
+    int (*endEncoding)(LWMGLCommand command);
+    int (*commit)(LWMGLCommand command);
+    int (*wait)(LWMGLCommand command);
+    void (*destroyCommand)(LWMGLCommand command);
+    int (*waitIdle)(void);
 
     size_t structSize;
     uint32_t abiVersion;
