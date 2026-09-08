@@ -5,10 +5,6 @@ on:
     branches: [main]
   pull_request:
 
-env:
-  LWCGL_SRC: ${{ runner.temp }}/lwcgl
-  LWCGL_PREFIX: ${{ runner.temp }}/lwcgl-prefix
-
 jobs:
   macos:
     runs-on: macos-15
@@ -17,6 +13,10 @@ jobs:
       - name: Dependencies
         run: |
           brew install pkg-config glfw
+          LWCGL_SRC="$RUNNER_TEMP/lwcgl"
+          LWCGL_PREFIX="$RUNNER_TEMP/lwcgl-prefix"
+          echo "LWCGL_SRC=$LWCGL_SRC" >> "$GITHUB_ENV"
+          echo "LWCGL_PREFIX=$LWCGL_PREFIX" >> "$GITHUB_ENV"
           git clone --depth 1 --branch v2.9.3 https://github.com/xt9y/lwcgl.git "$LWCGL_SRC"
           make -C "$LWCGL_SRC" clean all
           make -C "$LWCGL_SRC" install PREFIX="$LWCGL_PREFIX"
