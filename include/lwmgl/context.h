@@ -23,6 +23,13 @@ typedef struct LWMGLDeviceInfo {
     uint8_t reserved;
 } LWMGLDeviceInfo;
 
+typedef struct LWMGLClearColor {
+    double r;
+    double g;
+    double b;
+    double a;
+} LWMGLClearColor;
+
 const char *lwmglGetLastError(void);
 void lwmglClearError(void);
 
