@@ -1,9 +1,8 @@
 #include "internal.h"
 
-#include <algorithm>
-#include <cstdio>
-#include <cstring>
-#include <limits>
+#include <limits.h>
+#include <stdio.h>
+#include <string.h>
 
 static LWMGLContextState g_context = {};
 
@@ -74,19 +73,18 @@ static int contextGetDeviceInfo(LWMGLDeviceInfo *outInfo)
         return -1;
     }
 
-    std::memset(outInfo, 0, sizeof *outInfo);
+    memset(outInfo, 0, sizeof *outInfo);
     const char *name = g_context.device.name.UTF8String;
-    std::snprintf(outInfo->name, sizeof outInfo->name, "%s", name ? name : "Metal Device");
+    snprintf(outInfo->name, sizeof outInfo->name, "%s", name ? name : "Metal Device");
 
     if ([g_context.device respondsToSelector:@selector(recommendedMaxWorkingSetSize)]) {
         outInfo->recommendedMaxWorkingSetSize = (uint64_t)g_context.device.recommendedMaxWorkingSetSize;
     }
 
     const MTLSize groupLimit = g_context.device.maxThreadsPerThreadgroup;
-    outInfo->maxThreadsPerThreadgroup = (uint32_t)std::min<NSUInteger>(
-        groupLimit.width,
-        (NSUInteger)std::numeric_limits<uint32_t>::max()
-    );
+    outInfo->maxThreadsPerThreadgroup = groupLimit.width > UINT32_MAX
+        ? UINT32_MAX
+        : (uint32_t)groupLimit.width;
 
     if ([g_context.device respondsToSelector:@selector(hasUnifiedMemory)]) {
         outInfo->hasUnifiedMemory = g_context.device.hasUnifiedMemory ? 1u : 0u;
