@@ -116,6 +116,15 @@ const LWMGLMetalAPI Metal = {
     .textureHeight = lwmglTextureHeightInternal,
     .createSampler = lwmglSamplerCreateInternal,
     .destroySampler = lwmglSamplerDestroyInternal,
+    .createLibraryFromSource = lwmglLibraryCreateFromSourceInternal,
+    .createLibraryFromFile = lwmglLibraryCreateFromFileInternal,
+    .destroyLibrary = lwmglLibraryDestroyInternal,
+    .createFunction = lwmglFunctionCreateInternal,
+    .destroyFunction = lwmglFunctionDestroyInternal,
+    .createComputePipeline = lwmglComputePipelineCreateInternal,
+    .destroyComputePipeline = lwmglComputePipelineDestroyInternal,
+    .createRenderPipeline = lwmglRenderPipelineCreateInternal,
+    .destroyRenderPipeline = lwmglRenderPipelineDestroyInternal,
     .structSize = sizeof(LWMGLMetalAPI),
     .abiVersion = LWMGL_ABI_VERSION
 };
