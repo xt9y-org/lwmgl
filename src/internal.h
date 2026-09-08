@@ -89,6 +89,14 @@ int lwmglCommandDrawInternal(LWMGLCommand command, uint32_t vertexStart, uint32_
 int lwmglCommandPresentInternal(LWMGLCommand command);
 id<MTLCommandBuffer> lwmglNativeCommandBufferInternal(LWMGLCommand command);
 id<MTLComputeCommandEncoder> lwmglNativeComputeEncoderInternal(LWMGLCommand command);
+
+int lwmglRayTracingSupportedInternal(void);
+LWMGLAccelerationStructure lwmglTriangleAccelerationStructureCreateInternal(const LWMGLTriangleGeometryDesc *geometries, uint32_t geometryCount);
+LWMGLAccelerationStructure lwmglInstanceAccelerationStructureCreateInternal(const LWMGLInstanceDesc *instances, uint32_t instanceCount);
+int lwmglAccelerationStructureRebuildInternal(LWMGLAccelerationStructure accelerationStructure);
+void lwmglAccelerationStructureDestroyInternal(LWMGLAccelerationStructure accelerationStructure);
+int lwmglCommandSetAccelerationStructureInternal(LWMGLCommand command, LWMGLAccelerationStructure accelerationStructure, uint32_t index);
+id<MTLAccelerationStructure> lwmglNativeAccelerationStructureInternal(LWMGLAccelerationStructure accelerationStructure);
 #endif
 
 #endif
