@@ -152,5 +152,8 @@ const LWMGLMetalAPI Metal = {
     .destroyAccelerationStructure = lwmglAccelerationStructureDestroyInternal,
     .setAccelerationStructure = lwmglCommandSetAccelerationStructureInternal,
     .structSize = sizeof(LWMGLMetalAPI),
-    .abiVersion = LWMGL_ABI_VERSION
+    .abiVersion = LWMGL_ABI_VERSION,
+    .setFragmentBuffer = lwmglCommandSetFragmentBufferInternal,
+    .setFragmentTexture = lwmglCommandSetFragmentTextureInternal,
+    .setFragmentSampler = lwmglCommandSetFragmentSamplerInternal
 };
