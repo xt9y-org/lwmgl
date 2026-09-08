@@ -6,6 +6,7 @@
 #include <lwmgl/texture.h>
 #include <lwmgl/shader.h>
 #include <lwmgl/command.h>
+#include <lwmgl/raytracing.h>
 
 #ifdef __cplusplus
 extern "C" {
@@ -62,6 +63,13 @@ typedef struct LWMGLMetalAPI {
     int (*setRenderPipeline)(LWMGLCommand command, LWMGLRenderPipeline pipeline);
     int (*draw)(LWMGLCommand command, uint32_t vertexStart, uint32_t vertexCount);
     int (*present)(LWMGLCommand command);
+
+    int (*supportsRayTracing)(void);
+    LWMGLAccelerationStructure (*createTriangleAccelerationStructure)(const LWMGLTriangleGeometryDesc *geometries, uint32_t geometryCount);
+    LWMGLAccelerationStructure (*createInstanceAccelerationStructure)(const LWMGLInstanceDesc *instances, uint32_t instanceCount);
+    int (*rebuildAccelerationStructure)(LWMGLAccelerationStructure accelerationStructure);
+    void (*destroyAccelerationStructure)(LWMGLAccelerationStructure accelerationStructure);
+    int (*setAccelerationStructure)(LWMGLCommand command, LWMGLAccelerationStructure accelerationStructure, uint32_t index);
 
     size_t structSize;
     uint32_t abiVersion;
