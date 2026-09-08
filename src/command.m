@@ -357,6 +357,72 @@ int lwmglCommandSetRenderPipelineInternal(LWMGLCommand command, LWMGLRenderPipel
     return 0;
 }
 
+int lwmglCommandSetFragmentBufferInternal(
+    LWMGLCommand command,
+    LWMGLBuffer buffer,
+    size_t offset,
+    uint32_t index)
+{
+    if (validateMutableCommand(command) != 0) return -1;
+    id<MTLRenderCommandEncoder> encoder = nativeRenderEncoder(command);
+    if (!encoder) {
+        lwmglSetErrorInternal("render encoding is not active");
+        return -1;
+    }
+    id<MTLBuffer> native = lwmglNativeBufferInternal(buffer);
+    if (!native) {
+        lwmglSetErrorInternal("buffer is null");
+        return -1;
+    }
+    const size_t bufferSize = lwmglBufferSizeInternal(buffer);
+    if (offset > bufferSize) {
+        lwmglSetErrorInternal("buffer binding offset exceeds allocation");
+        return -1;
+    }
+    [encoder setFragmentBuffer:native offset:offset atIndex:index];
+    return 0;
+}
+
+int lwmglCommandSetFragmentTextureInternal(
+    LWMGLCommand command,
+    LWMGLTexture texture,
+    uint32_t index)
+{
+    if (validateMutableCommand(command) != 0) return -1;
+    id<MTLRenderCommandEncoder> encoder = nativeRenderEncoder(command);
+    if (!encoder) {
+        lwmglSetErrorInternal("render encoding is not active");
+        return -1;
+    }
+    id<MTLTexture> native = lwmglNativeTextureInternal(texture);
+    if (!native) {
+        lwmglSetErrorInternal("texture is null");
+        return -1;
+    }
+    [encoder setFragmentTexture:native atIndex:index];
+    return 0;
+}
+
+int lwmglCommandSetFragmentSamplerInternal(
+    LWMGLCommand command,
+    LWMGLSampler sampler,
+    uint32_t index)
+{
+    if (validateMutableCommand(command) != 0) return -1;
+    id<MTLRenderCommandEncoder> encoder = nativeRenderEncoder(command);
+    if (!encoder) {
+        lwmglSetErrorInternal("render encoding is not active");
+        return -1;
+    }
+    id<MTLSamplerState> native = lwmglNativeSamplerInternal(sampler);
+    if (!native) {
+        lwmglSetErrorInternal("sampler is null");
+        return -1;
+    }
+    [encoder setFragmentSamplerState:native atIndex:index];
+    return 0;
+}
+
 int lwmglCommandDrawInternal(LWMGLCommand command, uint32_t vertexStart, uint32_t vertexCount)
 {
     if (validateMutableCommand(command) != 0) return -1;
