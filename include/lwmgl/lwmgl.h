@@ -55,6 +55,14 @@ typedef struct LWMGLMetalAPI {
     void (*destroyCommand)(LWMGLCommand command);
     int (*waitIdle)(void);
 
+    int (*resize)(uint32_t pixelWidth, uint32_t pixelHeight);
+    uint32_t (*drawableWidth)(void);
+    uint32_t (*drawableHeight)(void);
+    int (*beginRenderToDrawable)(LWMGLCommand command, LWMGLClearColor clearColor, int clear);
+    int (*setRenderPipeline)(LWMGLCommand command, LWMGLRenderPipeline pipeline);
+    int (*draw)(LWMGLCommand command, uint32_t vertexStart, uint32_t vertexCount);
+    int (*present)(LWMGLCommand command);
+
     size_t structSize;
     uint32_t abiVersion;
 } LWMGLMetalAPI;
