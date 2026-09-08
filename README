@@ -1,0 +1,7 @@
+lwmgl v1.0.0
+
+Native C/C++ interface to Apple Metal.
+Currently only tested together with https://github.com/xt9y/lwcgl
+
+install --> make && sudo make install
+check   --> make check
