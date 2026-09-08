@@ -27,8 +27,10 @@ M_OBJ := $(patsubst src/%.m,$(BUILD)/%.o,$(M_SRC))
 OBJ := $(C_OBJ) $(M_OBJ)
 PKGCONFIG := $(BUILD)/lwmgl-$(VERSION).pc
 TEST_DIR := $(BUILD)/tests
+EXAMPLE_DIR := $(BUILD)/examples
 CONTRACT_C_SRC := $(filter-out tests/api_contract.c tests/header_contract.c,$(wildcard tests/*_contract.c))
 CONTRACT_C_BINS := $(patsubst tests/%_contract.c,$(TEST_DIR)/%-contract,$(CONTRACT_C_SRC))
+EXAMPLE_BINS := $(EXAMPLE_DIR)/clear-c $(EXAMPLE_DIR)/clear-cpp
 
 CPPFLAGS += -Iinclude
 CFLAGS ?= -O2
@@ -48,15 +50,16 @@ LIBS := $(GLFW_LIBS) $(PLATFORM_LIBS)
 
 TEST_BINS := $(TEST_DIR)/api-contract-c $(TEST_DIR)/api-contract-cpp $(TEST_DIR)/header-contract-c $(TEST_DIR)/header-contract-cpp $(CONTRACT_C_BINS)
 
-.PHONY: all clean check test install uninstall stage-check check-deps
+.PHONY: all clean check test install uninstall stage-check check-deps example
 all: check-deps $(STATIC_LIB) $(SHARED_LIB)
 test: check
+example: $(EXAMPLE_BINS)
 
 check-deps:
 	@command -v pkg-config >/dev/null 2>&1 || { echo "error: pkg-config is required"; exit 1; }
 	@pkg-config --atleast-version=3.3 glfw3 || { echo "error: GLFW >= 3.3 development files are required"; exit 1; }
 
-$(BUILD) $(TEST_DIR):
+$(BUILD) $(TEST_DIR) $(EXAMPLE_DIR):
 	mkdir -p $@
 
 $(BUILD)/%.o: src/%.c $(PUBLIC_HEADERS) | $(BUILD)
@@ -91,6 +94,12 @@ $(TEST_DIR)/header-contract-cpp: tests/header_contract.cpp | $(TEST_DIR)
 $(TEST_DIR)/%-contract: tests/%_contract.c $(STATIC_LIB) | $(TEST_DIR)
 	$(CC) $(CPPFLAGS) $(CFLAGS) -Werror $< $(STATIC_LIB) $(LDFLAGS) $(LIBS) -o $@
 
+$(EXAMPLE_DIR)/clear-c: examples/clear.c $(STATIC_LIB) | $(EXAMPLE_DIR)
+	$(CC) $(CPPFLAGS) $(CFLAGS) -Werror $< $(STATIC_LIB) $(LDFLAGS) $(LIBS) -o $@
+
+$(EXAMPLE_DIR)/clear-cpp: examples/clear.cpp $(STATIC_LIB) | $(EXAMPLE_DIR)
+	$(CXX) $(CPPFLAGS) $(CXXFLAGS) -Werror $< $(STATIC_LIB) $(LDFLAGS) $(LIBS) -o $@
+
 stage-check: check-deps $(STATIC_LIB) $(SHARED_LIB) $(PKGCONFIG)
 	rm -rf $(BUILD)/stage-prefix
 	$(MAKE) install PREFIX=$(abspath $(BUILD)/stage-prefix)
@@ -99,7 +108,7 @@ stage-check: check-deps $(STATIC_LIB) $(SHARED_LIB) $(PKGCONFIG)
 	$(TEST_DIR)/stage-consumer-c
 	$(TEST_DIR)/stage-consumer-cpp
 
-check: check-deps $(TEST_BINS) stage-check
+check: check-deps $(TEST_BINS) stage-check example
 	$(TEST_DIR)/api-contract-c
 	$(TEST_DIR)/api-contract-cpp
 	$(TEST_DIR)/header-contract-c
