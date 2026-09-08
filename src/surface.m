@@ -5,6 +5,8 @@
 #include <GLFW/glfw3.h>
 #include <GLFW/glfw3native.h>
 
+#include <limits.h>
+
 int lwmglSurfaceAttach(void *nativeWindow)
 {
     LWMGLContextState *state = lwmglContextState();
@@ -68,6 +70,37 @@ void lwmglSurfaceDetach(void)
     state->glfwWindow = NULL;
 }
 
+int lwmglSurfaceResizeInternal(uint32_t pixelWidth, uint32_t pixelHeight)
+{
+    LWMGLContextState *state = lwmglContextState();
+    if (!state->created || !state->layer || !state->glfwWindow) {
+        lwmglSetErrorInternal("Metal surface is not created");
+        return -1;
+    }
+
+    if ((pixelWidth == 0u) != (pixelHeight == 0u)) {
+        lwmglSetErrorInternal("drawable width and height must both be zero or both be non-zero");
+        return -1;
+    }
+
+    if (pixelWidth == 0u) {
+        int width = 0;
+        int height = 0;
+        glfwGetFramebufferSize((GLFWwindow *)state->glfwWindow, &width, &height);
+        if (width < 1) width = 1;
+        if (height < 1) height = 1;
+        pixelWidth = (uint32_t)width;
+        pixelHeight = (uint32_t)height;
+    }
+
+    state->layer.contentsScale = state->nsWindow && state->nsWindow.backingScaleFactor > 0.0
+        ? state->nsWindow.backingScaleFactor
+        : 1.0;
+    state->layer.frame = state->view ? state->view.bounds : CGRectZero;
+    state->layer.drawableSize = CGSizeMake((CGFloat)pixelWidth, (CGFloat)pixelHeight);
+    return 0;
+}
+
 void lwmglSurfaceUpdateDrawableSize(void)
 {
     LWMGLContextState *state = lwmglContextState();
@@ -84,6 +117,32 @@ void lwmglSurfaceUpdateDrawableSize(void)
         : 1.0;
     state->layer.frame = state->view ? state->view.bounds : CGRectZero;
     state->layer.drawableSize = CGSizeMake((CGFloat)width, (CGFloat)height);
+}
+
+uint32_t lwmglSurfaceDrawableWidthInternal(void)
+{
+    LWMGLContextState *state = lwmglContextState();
+    if (!state->created || !state->layer) {
+        lwmglSetErrorInternal("Metal surface is not created");
+        return 0u;
+    }
+    const double width = state->layer.drawableSize.width;
+    if (width <= 0.0) return 0u;
+    if (width >= (double)UINT32_MAX) return UINT32_MAX;
+    return (uint32_t)(width + 0.5);
+}
+
+uint32_t lwmglSurfaceDrawableHeightInternal(void)
+{
+    LWMGLContextState *state = lwmglContextState();
+    if (!state->created || !state->layer) {
+        lwmglSetErrorInternal("Metal surface is not created");
+        return 0u;
+    }
+    const double height = state->layer.drawableSize.height;
+    if (height <= 0.0) return 0u;
+    if (height >= (double)UINT32_MAX) return UINT32_MAX;
+    return (uint32_t)(height + 0.5);
 }
 
 int lwmglSurfaceAcquireDrawable(void)
