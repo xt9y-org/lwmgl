@@ -237,6 +237,7 @@ LWMGLAccelerationStructure lwmglTriangleAccelerationStructureCreateInternal(
             return NULL;
         }
         descriptor.geometryDescriptors = nativeGeometries;
+        descriptor.usage = MTLAccelerationStructureUsagePreferFastIntersection;
 
         id<MTLAccelerationStructure> accelerationStructure = buildDescriptor(descriptor);
         return wrapAccelerationStructure(accelerationStructure, descriptor);
@@ -314,6 +315,7 @@ LWMGLAccelerationStructure lwmglInstanceAccelerationStructureCreateInternal(
         descriptor.instanceDescriptorStride = sizeof(MTLAccelerationStructureUserIDInstanceDescriptor);
         descriptor.instanceCount = instanceCount;
         descriptor.instancedAccelerationStructures = nativeStructures;
+        descriptor.usage = MTLAccelerationStructureUsagePreferFastIntersection;
 
         id<MTLAccelerationStructure> accelerationStructure = buildDescriptor(descriptor);
         return wrapAccelerationStructure(accelerationStructure, descriptor);
