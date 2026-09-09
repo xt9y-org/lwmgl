@@ -169,9 +169,10 @@ int lwmglCommandSetComputePipelineInternal(LWMGLCommand command, LWMGLComputePip
 int lwmglCommandSetBufferInternal(LWMGLCommand command, LWMGLBuffer buffer, size_t offset, uint32_t index)
 {
     if (validateMutableCommand(command) != 0) return -1;
-    id<MTLComputeCommandEncoder> encoder = nativeComputeEncoder(command);
-    if (!encoder) {
-        lwmglSetErrorInternal("compute encoding is not active");
+    id<MTLComputeCommandEncoder> computeEncoder = nativeComputeEncoder(command);
+    id<MTLRenderCommandEncoder> renderEncoder = nativeRenderEncoder(command);
+    if (!computeEncoder && !renderEncoder) {
+        lwmglSetErrorInternal("compute or render encoding is not active");
         return -1;
     }
     id<MTLBuffer> native = lwmglNativeBufferInternal(buffer);
@@ -184,7 +185,11 @@ int lwmglCommandSetBufferInternal(LWMGLCommand command, LWMGLBuffer buffer, size
         lwmglSetErrorInternal("buffer binding offset exceeds allocation");
         return -1;
     }
-    [encoder setBuffer:native offset:offset atIndex:index];
+    if (computeEncoder) {
+        [computeEncoder setBuffer:native offset:offset atIndex:index];
+    } else {
+        [renderEncoder setVertexBuffer:native offset:offset atIndex:index];
+    }
     return 0;
 }
 
