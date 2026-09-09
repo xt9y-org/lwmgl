@@ -19,7 +19,7 @@ static const char source[] =
 
 int main(void)
 {
-    if (!Metal.setVertexBuffer || !Metal.setFragmentBuffer || !Metal.setFragmentTexture || !Metal.setFragmentSampler) return 1;
+    if (!Metal.setBuffer || !Metal.setFragmentBuffer || !Metal.setFragmentTexture || !Metal.setFragmentSampler) return 1;
     if (!glfwInit()) return 2;
     glfwWindowHint(GLFW_VISIBLE, GLFW_TRUE);
     glfwWindowHint(GLFW_CLIENT_API, GLFW_NO_API);
@@ -67,7 +67,7 @@ int main(void)
     const LWMGLClearColor clear = {0.0, 0.0, 0.0, 1.0};
     if (Metal.beginRenderToDrawable(command, clear, 1) != 0) return 14;
     if (Metal.setRenderPipeline(command, pipeline) != 0) return 15;
-    if (Metal.setVertexBuffer(command, vertexBuffer, 0u, 0u) != 0) return 16;
+    if (Metal.setBuffer(command, vertexBuffer, 0u, 0u) != 0) return 16;
     if (Metal.setFragmentBuffer(command, buffer, 0u, 0u) != 0) return 17;
     if (Metal.setFragmentTexture(command, texture, 0u) != 0) return 18;
     if (Metal.setFragmentSampler(command, sampler, 0u) != 0) return 19;
