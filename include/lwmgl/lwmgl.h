@@ -78,6 +78,12 @@ typedef struct LWMGLMetalAPI {
     int (*setFragmentBuffer)(LWMGLCommand command, LWMGLBuffer buffer, size_t offset, uint32_t index);
     int (*setFragmentTexture)(LWMGLCommand command, LWMGLTexture texture, uint32_t index);
     int (*setFragmentSampler)(LWMGLCommand command, LWMGLSampler sampler, uint32_t index);
+
+    /* Append-only v1 extension: borrowed native handles for backend interop. */
+    void *(*nativeDevice)(void);
+    void *(*nativeCommandBuffer)(LWMGLCommand command);
+    void *(*nativeRenderEncoder)(LWMGLCommand command);
+    void *(*nativeRenderPassDescriptor)(LWMGLCommand command);
 } LWMGLMetalAPI;
 
 extern const LWMGLMetalAPI Metal;
