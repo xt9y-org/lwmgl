@@ -99,6 +99,11 @@ static int contextGetDeviceInfo(LWMGLDeviceInfo *outInfo)
     return 0;
 }
 
+void *lwmglNativeDeviceBridgeInternal(void)
+{
+    return g_context.device ? (__bridge void *)g_context.device : NULL;
+}
+
 const LWMGLMetalAPI Metal = {
     .create = contextCreate,
     .destroy = contextDestroy,
@@ -155,5 +160,9 @@ const LWMGLMetalAPI Metal = {
     .abiVersion = LWMGL_ABI_VERSION,
     .setFragmentBuffer = lwmglCommandSetFragmentBufferInternal,
     .setFragmentTexture = lwmglCommandSetFragmentTextureInternal,
-    .setFragmentSampler = lwmglCommandSetFragmentSamplerInternal
+    .setFragmentSampler = lwmglCommandSetFragmentSamplerInternal,
+    .nativeDevice = lwmglNativeDeviceBridgeInternal,
+    .nativeCommandBuffer = lwmglNativeCommandBufferBridgeInternal,
+    .nativeRenderEncoder = lwmglNativeRenderEncoderBridgeInternal,
+    .nativeRenderPassDescriptor = lwmglNativeRenderPassDescriptorBridgeInternal
 };
