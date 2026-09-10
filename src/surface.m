@@ -34,6 +34,9 @@ int lwmglSurfaceAttach(void *nativeWindow)
         return -1;
     }
 
+    if (state->layer && state->glfwWindow == window) return 0;
+    if (state->layer) lwmglSurfaceDetach();
+
     NSWindow *nsWindow = glfwGetCocoaWindow(window);
     if (!nsWindow) {
         lwmglSetErrorInternal("unable to resolve Cocoa window from GLFW window");
