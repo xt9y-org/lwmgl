@@ -28,6 +28,7 @@ typedef struct LWMGLContextState {
     __strong CALayer *previousLayer;
     BOOL previousWantsLayer;
     __strong id<CAMetalDrawable> drawable;
+    uint32_t references;
     int autoDrawableSize;
     int created;
 } LWMGLContextState;
@@ -89,6 +90,7 @@ int lwmglCommandSetFragmentBufferInternal(LWMGLCommand command, LWMGLBuffer buff
 int lwmglCommandSetFragmentTextureInternal(LWMGLCommand command, LWMGLTexture texture, uint32_t index);
 int lwmglCommandSetFragmentSamplerInternal(LWMGLCommand command, LWMGLSampler sampler, uint32_t index);
 int lwmglCommandDrawInternal(LWMGLCommand command, uint32_t vertexStart, uint32_t vertexCount);
+int lwmglCommandDrawLinesInternal(LWMGLCommand command, uint32_t vertexStart, uint32_t vertexCount);
 int lwmglCommandPresentInternal(LWMGLCommand command);
 id<MTLCommandBuffer> lwmglNativeCommandBufferInternal(LWMGLCommand command);
 id<MTLComputeCommandEncoder> lwmglNativeComputeEncoderInternal(LWMGLCommand command);
