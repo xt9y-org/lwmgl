@@ -25,7 +25,7 @@ static int contextCreate(void *nativeWindow)
                 return -1;
             }
             ++g_context.references;
-            if (!g_context.layer && lwmglSurfaceAttach(nativeWindow) != 0) {
+            if (lwmglSurfaceAttach(nativeWindow) != 0) {
                 --g_context.references;
                 return -1;
             }
