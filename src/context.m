@@ -19,7 +19,18 @@ static int contextCreate(void *nativeWindow)
             lwmglSetErrorInternal("invalid native window");
             return -1;
         }
-        if (g_context.created) return 0;
+        if (g_context.created) {
+            if (g_context.references == UINT32_MAX) {
+                lwmglSetErrorInternal("Metal context reference count overflow");
+                return -1;
+            }
+            ++g_context.references;
+            if (!g_context.layer && lwmglSurfaceAttach(nativeWindow) != 0) {
+                --g_context.references;
+                return -1;
+            }
+            return 0;
+        }
 
         g_context.device = MTLCreateSystemDefaultDevice();
         if (!g_context.device) {
@@ -34,13 +45,15 @@ static int contextCreate(void *nativeWindow)
             return -1;
         }
 
+        g_context.created = 1;
+        g_context.references = 1u;
         if (lwmglSurfaceAttach(nativeWindow) != 0) {
+            g_context.references = 0u;
+            g_context.created = 0;
             g_context.queue = nil;
             g_context.device = nil;
             return -1;
         }
-
-        g_context.created = 1;
         return 0;
     }
 }
@@ -49,9 +62,16 @@ static void contextDestroy(void)
 {
     @autoreleasepool {
         if (!g_context.created && !g_context.layer && !g_context.device) return;
+        if (g_context.created && g_context.references > 1u) {
+            --g_context.references;
+            lwmglClearError();
+            return;
+        }
+
         lwmglSurfaceDetach();
         g_context.queue = nil;
         g_context.device = nil;
+        g_context.references = 0u;
         g_context.created = 0;
         lwmglClearError();
     }
@@ -60,6 +80,26 @@ static void contextDestroy(void)
 static int contextIsCreated(void)
 {
     return g_context.created;
+}
+
+static int contextAttachSurface(void *nativeWindow)
+{
+    if (!g_context.created || !g_context.device) {
+        lwmglSetErrorInternal("Metal context is not created");
+        return -1;
+    }
+    return lwmglSurfaceAttach(nativeWindow);
+}
+
+static void contextDetachSurface(void)
+{
+    if (!g_context.created && !g_context.layer) return;
+    lwmglSurfaceDetach();
+}
+
+static int contextIsSurfaceAttached(void)
+{
+    return g_context.layer != nil;
 }
 
 static int contextGetDeviceInfo(LWMGLDeviceInfo *outInfo)
@@ -164,5 +204,9 @@ const LWMGLMetalAPI Metal = {
     .nativeDevice = lwmglNativeDeviceBridgeInternal,
     .nativeCommandBuffer = lwmglNativeCommandBufferBridgeInternal,
     .nativeRenderEncoder = lwmglNativeRenderEncoderBridgeInternal,
-    .nativeRenderPassDescriptor = lwmglNativeRenderPassDescriptorBridgeInternal
+    .nativeRenderPassDescriptor = lwmglNativeRenderPassDescriptorBridgeInternal,
+    .attachSurface = contextAttachSurface,
+    .detachSurface = contextDetachSurface,
+    .isSurfaceAttached = contextIsSurfaceAttached,
+    .drawLines = lwmglCommandDrawLinesInternal
 };
