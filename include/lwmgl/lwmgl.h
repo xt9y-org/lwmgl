@@ -84,6 +84,12 @@ typedef struct LWMGLMetalAPI {
     void *(*nativeCommandBuffer)(LWMGLCommand command);
     void *(*nativeRenderEncoder)(LWMGLCommand command);
     void *(*nativeRenderPassDescriptor)(LWMGLCommand command);
+
+    /* Append-only v1 extension: shared surface control and line rendering. */
+    int (*attachSurface)(void *nativeWindow);
+    void (*detachSurface)(void);
+    int (*isSurfaceAttached)(void);
+    int (*drawLines)(LWMGLCommand command, uint32_t vertexStart, uint32_t vertexCount);
 } LWMGLMetalAPI;
 
 extern const LWMGLMetalAPI Metal;
