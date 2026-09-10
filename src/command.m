@@ -6,6 +6,7 @@ struct LWMGLCommandImpl {
     void *commandBuffer;
     void *computeEncoder;
     void *renderEncoder;
+    void *renderPassDescriptor;
     void *blitEncoder;
     void *drawable;
     NSUInteger computeExecutionWidth;
@@ -82,6 +83,7 @@ static void endActiveEncoder(LWMGLCommand command)
     if (command->renderEncoder) {
         [(__bridge id<MTLRenderCommandEncoder>)command->renderEncoder endEncoding];
         releaseRetained(&command->renderEncoder);
+        releaseRetained(&command->renderPassDescriptor);
     }
     if (command->blitEncoder) {
         [(__bridge id<MTLBlitCommandEncoder>)command->blitEncoder endEncoding];
@@ -340,6 +342,7 @@ int lwmglCommandBeginRenderToDrawableInternal(LWMGLCommand command, LWMGLClearCo
             lwmglSetErrorInternal("failed to create Metal render encoder");
             return -1;
         }
+        command->renderPassDescriptor = (__bridge_retained void *)pass;
         command->renderEncoder = (__bridge_retained void *)encoder;
         return 0;
     }
@@ -507,6 +510,7 @@ void lwmglCommandDestroyInternal(LWMGLCommand command)
         if (!command->committed) endActiveEncoder(command);
         releaseRetained(&command->computeEncoder);
         releaseRetained(&command->renderEncoder);
+        releaseRetained(&command->renderPassDescriptor);
         releaseRetained(&command->blitEncoder);
         releaseRetained(&command->drawable);
         releaseRetained(&command->commandBuffer);
@@ -546,4 +550,34 @@ id<MTLCommandBuffer> lwmglNativeCommandBufferInternal(LWMGLCommand command)
 id<MTLComputeCommandEncoder> lwmglNativeComputeEncoderInternal(LWMGLCommand command)
 {
     return nativeComputeEncoder(command);
+}
+
+id<MTLRenderCommandEncoder> lwmglNativeRenderEncoderInternal(LWMGLCommand command)
+{
+    return nativeRenderEncoder(command);
+}
+
+MTLRenderPassDescriptor *lwmglNativeRenderPassDescriptorInternal(LWMGLCommand command)
+{
+    return command && command->renderPassDescriptor
+        ? (__bridge MTLRenderPassDescriptor *)command->renderPassDescriptor
+        : nil;
+}
+
+void *lwmglNativeCommandBufferBridgeInternal(LWMGLCommand command)
+{
+    id<MTLCommandBuffer> object = nativeCommandBuffer(command);
+    return object ? (__bridge void *)object : NULL;
+}
+
+void *lwmglNativeRenderEncoderBridgeInternal(LWMGLCommand command)
+{
+    id<MTLRenderCommandEncoder> object = nativeRenderEncoder(command);
+    return object ? (__bridge void *)object : NULL;
+}
+
+void *lwmglNativeRenderPassDescriptorBridgeInternal(LWMGLCommand command)
+{
+    MTLRenderPassDescriptor *object = lwmglNativeRenderPassDescriptorInternal(command);
+    return object ? (__bridge void *)object : NULL;
 }
